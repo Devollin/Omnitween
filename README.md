@@ -15,7 +15,3 @@
   - NumberRange
 - Model tweening
 - Tweening values on tables
-
-oof
-## What is OmniTween?
-
