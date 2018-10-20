@@ -2,6 +2,7 @@
 ![alt text](https://github.com/Devollin/OmniTween/blob/master/assets/Omnitween-logo-v1.png?raw=true)
 **_Omnitween_** is an **open source** module to tween nearly anything in **Roblox** in an easy to use function, while also being capable of handling:
 - Bezier Curves
+- Sequential animations
 - Tweening DataTypes that are not supported with TweenService
   - NumberSequence
   - ColorSequence
