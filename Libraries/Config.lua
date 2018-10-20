@@ -14,7 +14,7 @@
 
 return {
 	TweenService = game:GetService'TweenService',
-	Easing = require(script.Parent.Easing),
+	Easing = require(script.Easing),
 	
 	Defaults = {
 		T = 0.25,
