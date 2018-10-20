@@ -1,9 +1,40 @@
 local Checks = require(script.Checks)
 local Config = require(script.Config)
-local Native = require(script.NativeHandler)
 local Bezier = require(script.Bezier)
-local Complex = require(script.ComplexTypeHandler)
-local TweenFunctions = require(script.TweenFunctions)
+local Reconstructor = require(script.Reconstructor)
+local TweenFunctions = {}
+
+function TweenFunctions.Play(Tweens)
+	
+end
+
+function TweenFunctions.Replay(Tweens)
+	
+end
+
+function TweenFunctions.Pause(Tweens)
+	
+end
+
+function TweenFunctions.Stop(Tweens)
+	
+end
+
+function TweenFunctions.Reverse(Tweens)
+	
+end
+
+local function Native(Object, Properties, Data)
+	return Config.TweenService:Create(Object, TweenInfo.new(Data.T, Data.ES, Data.ED, Data.RC, Data.R, Data.DT), Properties)
+end
+
+local function SetProperties(Objects, SetTo)
+	for Index, Object in ipairs(Objects) do
+		for Name, Value in pairs(SetTo) do
+			Object[Name] = Value
+		end
+	end
+end
 
 local function Tween(Objects, Properties, Data)
 	local Tweens
@@ -15,7 +46,7 @@ local function Tween(Objects, Properties, Data)
 		return -- Stops the tween function here if Good was false.
 	end
 	
-	Properties = Checks.CheckForBezier(Properties) -- Splits Properties into two tables: Bezier and Not.
+	Properties = Checks.SeparateTypes(Properties) -- Splits Properties into two tables: Bezier and Not.
 	Data = Data or {} -- Makes sure that Data is not nil.
 	
 	for Index, Info in pairs(Data) do -- Iterates over Data.
@@ -37,14 +68,8 @@ local function Tween(Objects, Properties, Data)
 				Tweens:Play() -- If AutoPlay (Data.AP) is true, then this tween will play.
 			end
 			
-			if Properties.Bezier and Properties.Bezier ~= {} then -- TODO: MAKE COMPLEX MODULE WORK TO ENABLE BEZIER CURVES ON PROPERTIES
-				local TSteps = math.floor((60 * Data.T) + 0.5)
-				for T = 1, TSteps do
-					for Index, Prop in pairs(Properties.Bezier) do
-						Bezier.BuildPath(Prop, T / TSteps)
-					end
-					wait()
-				end
+			if Properties.Bezier and Properties.Bezier ~= {} then -- TODO: MAKE RECONSTRUCTOR MODULE WORK TO ENABLE BEZIER CURVES ON PROPERTIES
+				
 			end
 			
 		elseif Result == 'table' then
@@ -59,8 +84,36 @@ local function Tween(Objects, Properties, Data)
 					end
 					
 				end
-			else
-				-- TODO : NUMBER/ANY OTHER DATA TWEEN GOES HERE
+			else -- TODO : CONTINUE WORK ON NUMBER TWEENING
+				
+				local Assist = {A = 0}
+				local Types = {Color3 = true, CFrame = true, UDim2 = true, Vector2 = true, Vector3 = true, }
+				
+				for Ind, Item in ipairs(Properties) do
+					spawn(function() 
+						for Ind2 = 1, Data.T * Data.SPS do 
+							Config.Easing.new(Data.T, Assist, {Val = 1}, tostring(Data.ED.Name..Data.ES.Name)):Update(Data.SPS) 
+							wait(Data.SPS) 
+						end 
+					end)
+					if Types[typeof(Item[2])] then
+						
+							for Ind2 = 1, Data.T * Data.SPS do 
+								Object[Item[1]] = Object[Item[1]]:Lerp(Item[2], Assist.Val) 
+								wait(Data.T / Data.SPS) 
+							end 
+						
+					else
+						
+							for Ind2 = 1, Data.T * Data.SPS do 
+								
+								Config.Easing.new(Data.T, Object, {[Item[1]] = Item[2]}, tostring(Data.ED.Name..Data.ES.Name)):Update(Data.SPS) 
+								wait(Data.SPS) 
+							end 
+						
+					end
+				end
+		
 			end
 		elseif Result == 'error' then -- If an unsupported Type is found, then this will print a warn and stop the tween.
 			warn(Message)
@@ -74,6 +127,9 @@ end
 
 return function(...)
 	local Data = {...}
+	if #Data == 0 then
+		return Config.Easing
+	end
 	if Checks.AnimationOrTween(...) then
 		local TweenS = {}
 		for Index = 1, #Data do
