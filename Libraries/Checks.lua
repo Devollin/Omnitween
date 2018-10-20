@@ -53,18 +53,29 @@ function Checks.DetermineType(Objects) -- Determines the Type of Objects, whethe
 end
 
 
-function Checks.CheckForBezier(Properties) -- Checks for Bezier-intended use.
+function Checks.SeparateTypes(Properties) -- Separates by tween type.
 	local ReturnTable = {Not = {}} -- Holds two tables, one for for Bezier tweens, and the other for regular tweens.
 	
 	for Index, Goal in pairs(Properties) do -- Iterates over Properties.
 		
 		if type(Goal) == 'table' then -- Is the Goal for a Property is a table?
-			if not ReturnTable.Bezier then
-				ReturnTable.Bezier = {}
+			if type(Goal[1]) == 'table' then -- Checks to see if this is a sequence or a bezier tween.
+				if not ReturnTable.Sequence then
+					ReturnTable.Sequence = {}
+				end
+				
+				ReturnTable.Sequence[Index] = Goal
+				
+			else
+				if not ReturnTable.Bezier then
+					ReturnTable.Bezier = {}
+				end
+				
+				ReturnTable.Bezier[Index] = Goal -- Inserts the Goal onto the Bezier table.
+				
 			end
-			ReturnTable.Bezier[Index] = Goal -- Inserts the Goal onto the Bezier table.
-			
 		else -- If the Goal is not a table, then it is a regular tween.
+			
 			ReturnTable.Not[Index] = Goal -- Inserts the Goal onto the Not table.
 			
 		end
