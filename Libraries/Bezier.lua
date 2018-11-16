@@ -1,46 +1,62 @@
--- Created by EgoMoose
--- URL : https://devforum.roblox.com/t/reparameterization-tips-and-tricks/135935
--- Adjusted for Omnitween
+local Bezier = {}
 
-local function FixedBezier(Time, A, B, C)
-    return (1 - Time)^2 * A + 2 * (1 - Time) * Time * B + Time^2 * C
+Bezier.__index = Bezier
+
+local function Lerp(A, B, C)
+	return A + (B - A) * C
 end
 
-local function Simpson(Function, VarA, VarB, Number)
-    if (Number % 2 ~= 0) then
-        return
-    end
-    local H = (VarB - VarA) / Number
-    local S = Function(VarA) + Function(VarB)
-    for Index = 1, Number, 2 do
-        S = S + 4 * Function(VarA + Index * H)
-    end
-    for Index = 2, Number-1, 2 do
-        S = S + 2 * Function(VarA + Index * H)
-    end
-    return S * (H / 3)
-end
-
-return function(Time, A, B, C, Number)
-    local function ArcLength(Time)
-        local VarA = A - 2*B + C
-        local VarB = 2 * (B - A)
-        local A = 4 * VarA:Dot(VarA)
-        local B = 4 * VarA:Dot(VarB)
-        local C = VarB:Dot(VarB)
-        return math.sqrt(A * Time * Time + B * Time + C)
-    end
-
-    local Number = Number or 16
-    local Length = Simpson(ArcLength, 0, 1, Number)
-	if not Length then
-		return
+function Bezier:BuildPath(CP)
+	local Points = {}
+	for Index = 1, self.Vectors - 1 do
+		Points[Index] = Lerp(self.Vectors[Index], self.Vectors[Index + 1], CP)
 	end
-    local Distance = Time * Length
-
-    for Index = 1, 5 do
-        Time = Time - (Simpson(ArcLength, 0, Time, Number) - Distance) / ArcLength(Time)
-    end
-
-    return FixedBezier(Time, A, B, C)
+	if #Points >= 3 then
+		return Bezier.BuildPath(Points, CP)
+	end
+	return Lerp(Points[1], Points[2], CP)
 end
+
+function Bezier:Reverse()
+	self.Data.Reverse = not self.Data.Reverse
+	self.Data.Time = 1 - self.Data.Time
+	
+end
+
+function Bezier:Stop()
+	
+end
+
+function Bezier:Play()
+	for Step = 1, self.Data.Length * self.Data.StepsPerSecond do
+		
+	end
+end
+
+function Bezier:Iterate()
+	
+end
+
+function Bezier:FixedCurve()
+	
+end
+
+function Bezier.new(Vectors, Data)
+	assert(Vectors ~= nil, 'No variables were given!')
+	assert(typeof(Vectors) == 'table', 'Vectors is not a table!')
+	local self = {}
+	setmetatable(self, Bezier)
+	Data = Data or {}
+	Data.Vectors = Vectors
+	Data.StepsPerSecond = Data.StepsPerSecond or 60
+	Data.Length = Data.Length or 1
+	Data.Time = Data.Time or 0
+	Data.Classic = Data.Classic or true -- When true, time is the percentage of distance
+	Data.Smooth = Data.Smooth or true
+	Data.Reverse = Data.Reverse or false
+	self.Data = Data
+	
+	return self
+end
+
+return Bezier
