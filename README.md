@@ -1,5 +1,6 @@
 # Omnitween
 ![alt text](https://github.com/Devollin/OmniTween/blob/master/assets/Omnitween-logo-v1.png?raw=true)
+**_Notice: this module is FAR from finished, but basic tweening and "Tweening values on tables" are currently complete._**
 **_Omnitween_** is an **open source** module to tween nearly anything in **Roblox** in an easy to use function, while also being capable of handling:
 - Bezier Curves
 - Sequential animations
