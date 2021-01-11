@@ -1,4 +1,4 @@
--- Omnitween | V1.0.0 | Written by Devollin
+-- Omnitween | V1.1.0 | Written by Devollin
 local Timers = require(script.Timers)
 
 -- Used to tween models, without using :SetPrimaryPartCFrame(), which causes inconsistencies over time.
@@ -17,20 +17,35 @@ end
 
 -- Tweens Instances that are applicable to be used with TweenService.
 local function Tween(Object, Props, Modifiers)
-	local Modifiers, Tween = Modifiers or {}, nil
+	local Modifiers = Modifiers or {}
 	Modifiers.T = Modifiers.T or Modifiers.Time or .25 -- Time
-	Modifiers.ES = Modifiers.ES or Modifiers.EasingStyle -- EasingStyle
-	Modifiers.ES = Modifiers.ES and (Enum.EasingStyle[Modifiers.ES] or Modifiers.ES) or Enum.EasingStyle.Quart
-	Modifiers.ED = Modifiers.ED or Modifiers.EasingDirection -- EasingDirection
-	Modifiers.ED = Modifiers.ED and (Enum.EasingDirection[Modifiers.ED] or Modifiers.ED) or Enum.EasingDirection.Out
+	Modifiers.ES = Modifiers.ES or Modifiers.EasingStyle or 'Quad' -- EasingStyle
+	Modifiers.ES = typeof(Modifiers.ES) == 'EnumItem' and Modifiers.ES or Enum.EasingStyle[Modifiers.ES]
+	Modifiers.ED = Modifiers.ED or Modifiers.EasingDirection or 'InOut' -- EasingDirection
+	Modifiers.ED = typeof(Modifiers.ED) == 'EnumItem' and Modifiers.ED or Enum.EasingDirection[Modifiers.ED]
 	Modifiers.RC = Modifiers.RC or Modifiers.RepeatCount or 0 -- RepeatCount
 	Modifiers.R = Modifiers.R or Modifiers.Repeat or false -- Repeat
 	Modifiers.DT = Modifiers.DT or Modifiers.DelayTime or 0 -- DelayTime
 	Modifiers.CB = Modifiers.CB or Modifiers.Callback or false -- Callback
+	Modifiers.DA = Modifiers.DA or Modifiers.DestroyAlways or true -- DestroyAlways
+	if Modifiers.D == false or Modifiers.Destroy == false then
+		Modifiers.D = false -- Destroy when complete, not when cancelled
+	elseif (Modifiers.D == nil and Modifiers.Destroy == nil) or (Modifiers.D or Modifiers.Destroy) then
+		Modifiers.D = true
+	end
 	local Return = Pure(Object, Props, Modifiers)
 	if Modifiers.AP == true or Modifiers.AP == nil then
 		Return:Play() -- AutoPlay
 	end
+	Return.Completed:Connect(function(State)
+		if Modifiers.CB then
+			Modifiers.CB(Object, Props, Modifiers, State)
+		end
+		if (Modifiers.DA) or (State == Enum.TweenStatus.Completed and Modifiers.D) then
+			Return:Destroy()
+		end
+	end)
+	Return.Parent = Object
 	return Return
 end
 
